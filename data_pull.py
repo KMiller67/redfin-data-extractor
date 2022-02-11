@@ -1,5 +1,6 @@
+import os
 import glob
-import os.path
+import time
 import requests
 
 import pandas as pd
@@ -11,6 +12,30 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
+
+
+def download_wait(download_path: str, timeout: int) -> bool:
+    """
+    Continually checks the given download path to see if a new file was added, waiting one second between checks
+    :param download_path: Path where downloaded file is expected to appear
+    :param timeout: Max number of seconds to wait for downloaded file to appear
+    :return: If a new CSV was added to the directory then True, otherwise False
+    """
+    old_num_files = len(os.listdir(download_path))  # Check number of files in the download path prior to download
+    seconds = 0
+    while seconds < timeout:
+        new_num_files = len(os.listdir(download_path))  # Check number of files in download path after download start
+        if new_num_files != old_num_files:
+            print(f"Waiting {seconds}")
+            time.sleep(1)
+            seconds += 1
+        else:
+            continue
+
+    if seconds < timeout:   # File was downloaded prior to timeout period
+        return True
+    else:                   # File was not downloaded before timeout period
+        return False
 
 
 class RedfinDataPuller:
@@ -32,16 +57,16 @@ class RedfinDataPuller:
         options = Options()
         options.add_argument("--headless")
 
-        # Specify downloads folder and file type
-        home = str(Path.home())
-        downloads_dir = home + r"\Downloads"
+        # Define directory where data will be downloaded and file type
+        dirname = os.path.abspath(os.path.dirname(__file__))
+        download_dir = os.path.join(dirname, "data")
         file_type = "\*csv"
 
         # Open Chrome web browser
         driver = webdriver.Chrome(service=service, options=options)
 
         # Enable Chromium driver to download files while in headless mode
-        params = {"behavior": "allow", "downloadPath": downloads_dir}
+        params = {"behavior": "allow", "downloadPath": download_dir}
         driver.execute_cdp_cmd("Page.setDownloadBehavior", params)
 
         # Navigate to Redfin website
@@ -55,30 +80,29 @@ class RedfinDataPuller:
 
         # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
         # listings for every page of the search results
-        wait_secs = 5
+        # wait_secs = 5
         driver.find_element(By.ID, "download-and-save").click()
-        driver.implicitly_wait(wait_secs)
+        # driver.implicitly_wait(wait_secs)
+
+        try:
+            # Wait for data file to finish downloading
+            download_wait(download_path=download_dir, timeout=10)
+
+            # Grab all files in downloads_dir that are CSVs and pick the last one (which was just downloaded)
+            csv_files = glob.glob(download_dir + file_type)
+            latest_file = max(csv_files, key=os.path.getctime)
+            re_data = pd.read_csv(latest_file)
+
+            if delete_csv:
+                os.remove(latest_file)
+
+        except Exception as e:
+            print(e)
 
         # Experimenting with waiting for href response to return 200 before continuing, signifying download is complete
         # download_url = \
         #     "https://www.redfin.com/stingray/api/gis-csv?al=1&include_pending_homes=true&isRentals=false&market=twincities&num_homes=350&ord=redfin-recommended-asc&page_number=1&region_id=14201&region_type=6&sf=1,2,5,6,7&status=9&uipt=1,2,3,4,5,6,7,8&v=8"
         # print(requests.get())
-
-        # Grab all files in downloads_dir that are CSVs and pick the last one (which was just downloaded)
-        csv_files = glob.glob(downloads_dir + file_type)
-        latest_file = max(csv_files, key=os.path.getctime)
-
-        re_data = pd.read_csv(latest_file)
-
-        # if delete_csv:
-        #     try:
-        #         # Grab all files in downloads_dir that are CSVs and pick the last one (which was just downloaded)
-        #         csv_files = glob.glob(downloads_dir + file_type)
-        #         latest_file = max(csv_files, key=os.path.getctime)
-        #
-        #         re_data = pd.read_csv(latest_file)
-        #
-        #     except:
 
         # Close browser
         driver.quit()
