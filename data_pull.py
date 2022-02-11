@@ -1,11 +1,9 @@
 import os
 import glob
 import time
-import requests
 
 import pandas as pd
 
-from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -14,23 +12,22 @@ from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-def download_wait(download_path: str, timeout: int) -> bool:
+def download_wait(download_path: str, files_in_path: int, timeout: int) -> bool:
     """
     Continually checks the given download path to see if a new file was added, waiting one second between checks
     :param download_path: Path where downloaded file is expected to appear
+    :param files_in_path: Number of files in download_path prior to attempting download of real estate data
     :param timeout: Max number of seconds to wait for downloaded file to appear
     :return: If a new CSV was added to the directory then True, otherwise False
     """
-    old_num_files = len(os.listdir(download_path))  # Check number of files in the download path prior to download
     seconds = 0
     while seconds < timeout:
         new_num_files = len(os.listdir(download_path))  # Check number of files in download path after download start
-        if new_num_files != old_num_files:
-            print(f"Waiting {seconds}")
+        if new_num_files == files_in_path:
             time.sleep(1)
             seconds += 1
         else:
-            continue
+            break
 
     if seconds < timeout:   # File was downloaded prior to timeout period
         return True
@@ -85,8 +82,10 @@ class RedfinDataPuller:
         # driver.implicitly_wait(wait_secs)
 
         try:
+            old_num_files = len(os.listdir(download_dir))   # Check number of files in download path prior to download
+
             # Wait for data file to finish downloading
-            download_wait(download_path=download_dir, timeout=10)
+            download_wait(download_path=download_dir, files_in_path=old_num_files, timeout=10)
 
             # Grab all files in downloads_dir that are CSVs and pick the last one (which was just downloaded)
             csv_files = glob.glob(download_dir + file_type)
@@ -98,11 +97,6 @@ class RedfinDataPuller:
 
         except Exception as e:
             print(e)
-
-        # Experimenting with waiting for href response to return 200 before continuing, signifying download is complete
-        # download_url = \
-        #     "https://www.redfin.com/stingray/api/gis-csv?al=1&include_pending_homes=true&isRentals=false&market=twincities&num_homes=350&ord=redfin-recommended-asc&page_number=1&region_id=14201&region_type=6&sf=1,2,5,6,7&status=9&uipt=1,2,3,4,5,6,7,8&v=8"
-        # print(requests.get())
 
         # Close browser
         driver.quit()
