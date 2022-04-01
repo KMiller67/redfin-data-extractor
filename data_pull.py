@@ -56,8 +56,8 @@ class RedfinDataPuller:
 
         # Define directory where data will be downloaded and file type
         dirname = os.path.abspath(os.path.dirname(__file__))
-        download_dir = os.path.join(dirname, "data")
-        file_type = "\*csv"
+        download_dir = os.path.join(dirname, "data", "")
+        file_type = "*.csv"
 
         # Open Chrome web browser
         driver = webdriver.Chrome(service=service, options=options)
@@ -78,12 +78,11 @@ class RedfinDataPuller:
         # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
         # listings for every page of the search results
         # wait_secs = 5
+        old_num_files = len(os.listdir(download_dir))  # Check number of files in download path prior to download
         driver.find_element(By.ID, "download-and-save").click()
         # driver.implicitly_wait(wait_secs)
 
         try:
-            old_num_files = len(os.listdir(download_dir))   # Check number of files in download path prior to download
-
             # Wait for data file to finish downloading
             download_wait(download_path=download_dir, files_in_path=old_num_files, timeout=10)
 
@@ -95,10 +94,13 @@ class RedfinDataPuller:
             if delete_csv:
                 os.remove(latest_file)
 
+            # Close browser
+            driver.quit()
+
+            return re_data
+
         except Exception as e:
             print(e)
 
-        # Close browser
-        driver.quit()
-
-        return re_data
+            # Close browser
+            driver.quit()
