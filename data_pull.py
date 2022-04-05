@@ -39,11 +39,10 @@ class RedfinDataPuller:
     def __init__(self):
         pass
 
-    def pull_data(self, city: str, state: str, delete_csv: bool = False):
+    def pull_data(self, search_criteria: str, delete_csv: bool = False):
         """
         Attempts to download csv of Redfin real estat data using the provided city and state params as search criteria
-        :param city: Name of the city to pull data from
-        :param state: Name of the state to pull data from; can be full name of the state or abbreviation
+        :param search_criteria: Search criteria to be entered into Redfin search bar (city, state, address, etc.)
         :param delete_csv: When set to True, deletes the CSV file that is downloaded as part of the data pulling process
         :return: Pandas DataFrame containing real estate data from Redfin for the desired city & state
         """
@@ -72,7 +71,7 @@ class RedfinDataPuller:
 
         # Identify search bar on home page for entering a real estate search location and search for input city/state
         # Finds first search bar on the home page, which is the one we're looking for
-        driver.find_element(By.CLASS_NAME, "search-input-box").send_keys(f"{city}, {state}" + Keys.ENTER)
+        driver.find_element(By.CLASS_NAME, "search-input-box").send_keys(f"{search_criteria}" + Keys.ENTER)
         driver.implicitly_wait(1)
 
         # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
