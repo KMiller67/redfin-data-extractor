@@ -35,6 +35,20 @@ def download_wait(download_path: str, files_in_path: int, timeout: int) -> bool:
         return False
 
 
+def home_type_select(home_types: list):
+    """
+    Helper function to select the home type(s) the user desires to pull data for
+    :param home_types: List of all home types the user desires to pull data for; Options include: house, townhouse,
+    condo, land, multi-family, mobile, co-op, and other
+    :return: N/A; used only to select desired home types on Redfin website
+    """
+    # Ensure home types are lowercase
+    home_types = map(lambda x: x.lower, home_types)
+
+    # Dictionary with key being house type and value being the appropriate XPATH from Redfin site
+    type_xpaths = {''}
+
+
 class RedfinDataPuller:
     def __init__(self):
         pass
@@ -51,34 +65,47 @@ class RedfinDataPuller:
 
         # Specify options to run in headless mode for efficiency and to allow downloading files while in headless mode
         options = Options()
-        options.add_argument("--headless")
+        # options.add_argument("--headless")
 
         # Define directory where data will be downloaded and file type
         dirname = os.path.abspath(os.path.dirname(__file__))
-        download_dir = os.path.join(dirname, "data", "")
-        file_type = "*.csv"
+        download_dir = os.path.join(dirname, 'data','')
+        file_type = '*.csv'
 
         # Open Chrome web browser
         driver = webdriver.Chrome(service=service, options=options)
 
         # Enable Chromium driver to download files while in headless mode
-        params = {"behavior": "allow", "downloadPath": download_dir}
-        driver.execute_cdp_cmd("Page.setDownloadBehavior", params)
+        params = {'behavior': 'allow', 'downloadPath': download_dir}
+        driver.execute_cdp_cmd('Page.setDownloadBehavior', params)
 
         # Navigate to Redfin website
-        driver.get("http://www.redfin.com")
+        driver.get('http://www.redfin.com')
         driver.implicitly_wait(1)
 
         # Identify search bar on home page for entering a real estate search location and search for input city/state
         # Finds first search bar on the home page, which is the one we're looking for
-        driver.find_element(By.CLASS_NAME, "search-input-box").send_keys(f"{search_criteria}" + Keys.ENTER)
+        driver.find_element(By.CLASS_NAME, 'search-input-box').send_keys(f'{search_criteria}' + Keys.ENTER)
         driver.implicitly_wait(1)
+
+        # Select to pull only current active listings
+        # Click 'For Sale' dropdown, followed by clicking 'Coming Soon' checkbox to turn it off
+        # driver.find_element(By.XPATH, '//*[@id="sidepane-header"]/div/div[1]/form/div[1]/div/span').click()
+        # driver.find_element(By.XPATH, '//*[@id="forSale-expandable-segment"]/div[1]/div/div[1]/span/label/span[1]').click()
+
+        # Click 'All Filters'; Set to show 'For Sale' listings only by default
+        driver.find_element(By.XPATH, '//*[@id="sidepane-header"]/div/div[1]/form/div[5]/div').click()
+
+        # Select desired 'Home Type'
+
+
+
 
         # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
         # listings for every page of the search results
         # wait_secs = 5
         old_num_files = len(os.listdir(download_dir))  # Check number of files in download path prior to download
-        driver.find_element(By.ID, "download-and-save").click()
+        driver.find_element(By.ID, 'download-and-save').click()
         # driver.implicitly_wait(wait_secs)
 
         try:
@@ -103,3 +130,7 @@ class RedfinDataPuller:
 
             # Close browser
             driver.quit()
+
+
+re = RedfinDataPuller()
+data = re.pull_data('Rochester, MN')
