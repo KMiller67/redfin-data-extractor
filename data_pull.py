@@ -10,6 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
+from typing import Union
 
 
 def download_wait(download_path: str, files_in_path: int, timeout: int) -> bool:
@@ -35,28 +36,43 @@ def download_wait(download_path: str, files_in_path: int, timeout: int) -> bool:
         return False
 
 
-def home_type_select(home_types: list):
+def home_type_select(home_types: list, driver: webdriver):
     """
-    Helper function to select the home type(s) the user desires to pull data for
+    Helper function to select the home type(s) the user desires to pull data for; this function is intended to be used
+    AFTER the 'All Filters' dropdown has been clicked
     :param home_types: List of all home types the user desires to pull data for; Options include: house, townhouse,
     condo, land, multi-family, mobile, co-op, and other
+    :param driver: Webdriver used for webscraping
     :return: N/A; used only to select desired home types on Redfin website
     """
     # Ensure home types are lowercase
-    home_types = map(lambda x: x.lower, home_types)
+    home_types = map(lambda x: x.lower(), home_types)
 
     # Dictionary with key being house type and value being the appropriate XPATH from Redfin site
-    type_xpaths = {''}
+    type_xpaths = {'house': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[1]/div',
+                   'townhouse': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[2]/div',
+                   'condo': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[3]/div',
+                   'land': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[4]/div',
+                   'multi-family': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[5]/div',
+                   'mobile': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[6]/div',
+                   'co-op': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[7]/div',
+                   'other': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[8]/div'}
+
+    # Select desired home types within the Redfin 'All Filters' dropdown
+    for type in home_types:
+        driver.find_element(By.XPATH, type_xpaths[type]).click()
 
 
 class RedfinDataPuller:
     def __init__(self):
         pass
 
-    def pull_data(self, search_criteria: str, delete_csv: bool = False):
+    def pull_data(self, search_criteria: str, home_types: Union[str, list], delete_csv: bool = False):
         """
         Attempts to download csv of Redfin real estat data using the provided city and state params as search criteria
         :param search_criteria: Search criteria to be entered into Redfin search bar (city, state, address, etc.)
+        :param home_types: Type(s) of home of which to pull data for. Options include: house, townhouse, condo, land,
+        multi-family, mobile, co-op, and other. If selecting more than one home type, initialize param as a list
         :param delete_csv: When set to True, deletes the CSV file that is downloaded as part of the data pulling process
         :return: Pandas DataFrame containing real estate data from Redfin for the desired city & state
         """
@@ -69,7 +85,7 @@ class RedfinDataPuller:
 
         # Define directory where data will be downloaded and file type
         dirname = os.path.abspath(os.path.dirname(__file__))
-        download_dir = os.path.join(dirname, 'data','')
+        download_dir = os.path.join(dirname, 'data', '')
         file_type = '*.csv'
 
         # Open Chrome web browser
@@ -88,18 +104,19 @@ class RedfinDataPuller:
         driver.find_element(By.CLASS_NAME, 'search-input-box').send_keys(f'{search_criteria}' + Keys.ENTER)
         driver.implicitly_wait(1)
 
-        # Select to pull only current active listings
-        # Click 'For Sale' dropdown, followed by clicking 'Coming Soon' checkbox to turn it off
-        # driver.find_element(By.XPATH, '//*[@id="sidepane-header"]/div/div[1]/form/div[1]/div/span').click()
-        # driver.find_element(By.XPATH, '//*[@id="forSale-expandable-segment"]/div[1]/div/div[1]/span/label/span[1]').click()
-
         # Click 'All Filters'; Set to show 'For Sale' listings only by default
         driver.find_element(By.XPATH, '//*[@id="sidepane-header"]/div/div[1]/form/div[5]/div').click()
 
         # Select desired 'Home Type'
+        if type(home_types) == str:     # If user selects single home type (string), convert it to a list
+            home_types = [home_types]
+        home_type_select(home_types=home_types, driver=driver)
 
+        # Listing status set to both 'Coming Soon' and 'Active' by default; Uncheck 'Coming Soon'
+        driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[1]/div/div[2]/span[1]/label/span[1]').click()
 
-
+        # Close 'All Filters' menu
+        # driver.find_element(By.CLASS_NAME, 'SvgIcon close').click()
 
         # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
         # listings for every page of the search results
