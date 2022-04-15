@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 from webdriver_manager.chrome import ChromeDriverManager
 from typing import Union
 
@@ -115,8 +116,13 @@ class RedfinDataPuller:
         # Listing status set to both 'Coming Soon' and 'Active' by default; Uncheck 'Coming Soon'
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[1]/div/div[2]/span[1]/label/span[1]').click()
 
+        # Set to only include listings from the last 3 days (reduces # of homes to download; need to keep < 350)
+        # Typing '3' after selecting dropdown selects the 'Less the 3 days' option
+        select = Select(driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[2]/div[2]/span/span/select'))
+        select.select_by_visible_text('Less than 3 days')
+
         # Close 'All Filters' menu
-        # driver.find_element(By.CLASS_NAME, 'SvgIcon close').click()
+        driver.find_element(By.XPATH, '//*[@id="right-container"]/div[6]/div/aside/header/button').click()
 
         # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
         # listings for every page of the search results
