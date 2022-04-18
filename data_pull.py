@@ -82,7 +82,7 @@ class RedfinDataPuller:
 
         # Specify options to run in headless mode for efficiency and to allow downloading files while in headless mode
         options = Options()
-        options.add_argument("--headless")
+        # options.add_argument("--headless")
 
         # Define directory where data will be downloaded and file type
         dirname = os.path.abspath(os.path.dirname(__file__))
@@ -110,6 +110,9 @@ class RedfinDataPuller:
         # driver.implicitly_wait(1)
 
         # Select desired 'Home Type'
+        home_type_header = driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[5]/div[1]/div/span')
+        driver.execute_script("return arguments[0].scrollIntoView();", home_type_header)
+
         if type(home_types) == str:     # If user selects single home type (string), convert it to a list
             home_types = [home_types]
         home_type_select(home_types=home_types, driver=driver)
@@ -122,10 +125,13 @@ class RedfinDataPuller:
         # Set to only include listings from the last 3 days (reduces # of homes to download; need to keep < 350)
         # Typing '3' after selecting dropdown selects the 'Less the 3 days' option
         select = Select(driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[2]/div[2]/span/span/select'))
-        select.select_by_visible_text('Less than 3 days')
+        select.select_by_visible_text('Less than 7 days')
         # driver.implicitly_wait(1)
 
         # Turn off 'Foreclosures' listing type
+        listing_type_header = driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[10]/div[1]/div/span')
+        driver.execute_script('return arguments[0].scrollIntoView()', listing_type_header)
+
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[10]/div[2]/div/div[1]/div[2]/span/label/span[1]').click()
         # driver.implicitly_wait(1)
 
@@ -168,4 +174,4 @@ re = RedfinDataPuller()
 
 search_criteria = 'Rochester, MN'
 home_types = ['house', 'townhouse', 'condo', 'multi-family']
-data = re.pull_data(search_criteria=search_criteria, home_types=home_types, delete_csv=True)
+data = re.pull_data(search_criteria=search_criteria, home_types=home_types)
