@@ -68,7 +68,7 @@ class RedfinDataPuller:
     def __init__(self):
         pass
 
-    def pull_data(self, search_criteria: str, home_types: Union[str, list], delete_csv: bool = False):
+    def listing_data(self, search_criteria: str, home_types: Union[str, list], delete_csv: bool = False):
         """
         Attempts to download csv of Redfin real estat data using the provided city and state params as search criteria
         :param search_criteria: Search criteria to be entered into Redfin search bar (city, state, address, etc.)
@@ -82,7 +82,7 @@ class RedfinDataPuller:
 
         # Specify options to run in headless mode for efficiency and to allow downloading files while in headless mode
         options = Options()
-        # options.add_argument("--headless")
+        options.add_argument("--headless")
 
         # Define directory where data will be downloaded and file type
         dirname = os.path.abspath(os.path.dirname(__file__))
@@ -98,47 +98,48 @@ class RedfinDataPuller:
 
         # Navigate to Redfin website
         driver.get('http://www.redfin.com')
-        time.sleep(1)
+        time.sleep(1.5)
 
         # Identify search bar on home page for entering a real estate search location and search for input city/state
         # Finds first search bar on the home page, which is the one we're looking for
         driver.find_element(By.CLASS_NAME, 'search-input-box').send_keys(f'{search_criteria}' + Keys.ENTER)
-        time.sleep(1)
+        time.sleep(1.5)
 
         # Click 'All Filters'; Set to show 'For Sale' listings only by default
         driver.find_element(By.XPATH, '//*[@id="sidepane-header"]/div/div[1]/form/div[5]/div').click()
-        time.sleep(1)
+        time.sleep(1.5)
 
         # Select desired 'Home Type'
         home_type_header = driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[5]/div[1]/div/span')
         driver.execute_script("return arguments[0].scrollIntoView();", home_type_header)
-        time.sleep(1)
+        time.sleep(1.5)
 
         if type(home_types) == str:     # If user selects single home type (string), convert it to a list
             home_types = [home_types]
         home_type_select(home_types=home_types, driver=driver)
-        time.sleep(1)
+        time.sleep(1.5)
 
         # Listing status set to both 'Coming Soon' and 'Active' by default; Uncheck 'Coming Soon'
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[1]/div/div[2]/span[1]/label/span[1]').click()
-        time.sleep(1)
+        time.sleep(1.5)
 
         # Set to only include listings from the last 3 days (reduces # of homes to download; need to keep < 350)
         # Typing '3' after selecting dropdown selects the 'Less the 3 days' option
         select = Select(driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[2]/div[2]/span/span/select'))
         select.select_by_visible_text('Less than 7 days')
-        time.sleep(1)
+        time.sleep(1.5)
 
         # Turn off 'Foreclosures' listing type
         listing_type_header = driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[10]/div[1]/div/span')
         driver.execute_script('return arguments[0].scrollIntoView()', listing_type_header)
+        time.sleep(1.5)
 
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[10]/div[2]/div/div[1]/div[2]/span/label/span[1]').click()
-        time.sleep(1)
+        time.sleep(1.5)
 
         # Close 'All Filters' menu
         driver.find_element(By.XPATH, '//*[@id="right-container"]/div[6]/div/aside/header/button').click()
-        time.sleep(1)
+        time.sleep(1.5)
 
         # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
         # listings for every page of the search results
@@ -171,6 +172,6 @@ class RedfinDataPuller:
 
 re = RedfinDataPuller()
 
-search_criteria = 'Rochester, MN'
-home_types = ['house', 'townhouse', 'condo', 'multi-family']
-data = re.pull_data(search_criteria=search_criteria, home_types=home_types)
+search = 'Rochester, MN'
+prop_types = ['house', 'townhouse', 'condo', 'multi-family']
+data = re.listing_data(search_criteria=search, home_types=prop_types)
