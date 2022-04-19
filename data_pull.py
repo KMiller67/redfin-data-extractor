@@ -168,10 +168,3 @@ class RedfinDataPuller:
 
             # Close browser
             driver.quit()
-
-
-re = RedfinDataPuller()
-
-search = 'Rochester, MN'
-prop_types = ['house', 'townhouse', 'condo', 'multi-family']
-data = re.listing_data(search_criteria=search, home_types=prop_types)
