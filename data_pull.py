@@ -68,14 +68,11 @@ class RedfinDataPuller:
     def __init__(self):
         pass
 
-    def listing_data(self, search_criteria: str, home_types: Union[str, list], delete_csv: bool = False):
+    def connect(self):
         """
-        Attempts to download csv of Redfin real estat data using the provided city and state params as search criteria
-        :param search_criteria: Search criteria to be entered into Redfin search bar (city, state, address, etc.)
-        :param home_types: Type(s) of home of which to pull data for. Options include: house, townhouse, condo, land,
-        multi-family, mobile, co-op, and other. If selecting more than one home type, initialize param as a list
-        :param delete_csv: When set to True, deletes the CSV file that is downloaded as part of the data pulling process
-        :return: Pandas DataFrame containing real estate data from Redfin for the desired city & state
+        Sets up a Chrome webdriver and opens up the Redfin website on the home screen, as well as specifying folder to
+        download CSVs to
+        :return: Chrome webdriver used to connect to Redfin and download directory where downloaded files will be located
         """
         # Get the location used by the manager and initialize the driver using Chrome
         service = Service(executable_path=ChromeDriverManager().install())
@@ -84,13 +81,12 @@ class RedfinDataPuller:
         options = Options()
         options.add_argument("--headless")
 
+        # Open Chrome web browser
+        driver = webdriver.Chrome(service=service, options=options)
+
         # Define directory where data will be downloaded and file type
         dirname = os.path.abspath(os.path.dirname(__file__))
         download_dir = os.path.join(dirname, 'data', '')
-        file_type = '*.csv'
-
-        # Open Chrome web browser
-        driver = webdriver.Chrome(service=service, options=options)
 
         # Enable Chromium driver to download files while in headless mode
         params = {'behavior': 'allow', 'downloadPath': download_dir}
@@ -100,6 +96,20 @@ class RedfinDataPuller:
         driver.get('http://www.redfin.com')
         time.sleep(1.5)
 
+        return driver, download_dir
+
+    def listing_data(self, driver: webdriver, download_dir: str, search_criteria: str, home_types: Union[str, list],
+                     delete_csv: bool = False):
+        """
+        Attempts to download csv of Redfin real estat data using the provided city and state params as search criteria
+        :param driver: Webdriver used to connect to Redfin website
+        :param download_dir: Directory where downloaded CSV files will go
+        :param search_criteria: Search criteria to be entered into Redfin search bar (city, state, address, etc.)
+        :param home_types: Type(s) of home of which to pull data for. Options include: house, townhouse, condo, land,
+        multi-family, mobile, co-op, and other. If selecting more than one home type, initialize param as a list
+        :param delete_csv: When set to True, deletes the CSV file that is downloaded as part of the data pulling process
+        :return: Pandas DataFrame containing real estate data from Redfin for the desired city & state
+        """
         # Identify search bar on home page for entering a real estate search location and search for input city/state
         # Finds first search bar on the home page, which is the one we're looking for
         driver.find_element(By.CLASS_NAME, 'search-input-box').send_keys(f'{search_criteria}' + Keys.ENTER)
@@ -123,8 +133,7 @@ class RedfinDataPuller:
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[1]/div/div[2]/span[1]/label/span[1]').click()
         time.sleep(1.5)
 
-        # Set to only include listings from the last 3 days (reduces # of homes to download; need to keep < 350)
-        # Typing '3' after selecting dropdown selects the 'Less the 3 days' option
+        # Set to only include listings from the last 7 days (reduces # of homes to download; need to keep < 350)
         select = Select(driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[2]/div[2]/span/span/select'))
         select.select_by_visible_text('Less than 7 days')
         time.sleep(1.5)
@@ -144,6 +153,7 @@ class RedfinDataPuller:
         # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
         # listings for every page of the search results
         old_num_files = len(os.listdir(download_dir))  # Check number of files in download path prior to download
+        file_type = '*.csv'
         driver.find_element(By.ID, 'download-and-save').click()
 
         try:
@@ -168,3 +178,7 @@ class RedfinDataPuller:
 
             # Close browser
             driver.quit()
+
+# re = RedfinDataPuller()
+# driver, dwnld_dir = re.connect()
+# data = re.listing_data(driver, dwnld_dir, 'Rochester, MN', ['house', 'townhouse', 'condo', 'multi-family'])
