@@ -98,53 +98,52 @@ class RedfinDataPuller:
 
         # Navigate to Redfin website
         driver.get('http://www.redfin.com')
-        driver.implicitly_wait(1)
+        time.sleep(1)
 
         # Identify search bar on home page for entering a real estate search location and search for input city/state
         # Finds first search bar on the home page, which is the one we're looking for
         driver.find_element(By.CLASS_NAME, 'search-input-box').send_keys(f'{search_criteria}' + Keys.ENTER)
-        driver.implicitly_wait(1)
+        time.sleep(1)
 
         # Click 'All Filters'; Set to show 'For Sale' listings only by default
         driver.find_element(By.XPATH, '//*[@id="sidepane-header"]/div/div[1]/form/div[5]/div').click()
-        # driver.implicitly_wait(1)
+        time.sleep(1)
 
         # Select desired 'Home Type'
         home_type_header = driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[5]/div[1]/div/span')
         driver.execute_script("return arguments[0].scrollIntoView();", home_type_header)
+        time.sleep(1)
 
         if type(home_types) == str:     # If user selects single home type (string), convert it to a list
             home_types = [home_types]
         home_type_select(home_types=home_types, driver=driver)
-        # driver.implicitly_wait(1)
+        time.sleep(1)
 
         # Listing status set to both 'Coming Soon' and 'Active' by default; Uncheck 'Coming Soon'
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[1]/div/div[2]/span[1]/label/span[1]').click()
-        # driver.implicitly_wait(1)
+        time.sleep(1)
 
         # Set to only include listings from the last 3 days (reduces # of homes to download; need to keep < 350)
         # Typing '3' after selecting dropdown selects the 'Less the 3 days' option
         select = Select(driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[2]/div[2]/span/span/select'))
         select.select_by_visible_text('Less than 7 days')
-        # driver.implicitly_wait(1)
+        time.sleep(1)
 
         # Turn off 'Foreclosures' listing type
         listing_type_header = driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[10]/div[1]/div/span')
         driver.execute_script('return arguments[0].scrollIntoView()', listing_type_header)
 
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[10]/div[2]/div/div[1]/div[2]/span/label/span[1]').click()
-        # driver.implicitly_wait(1)
+        time.sleep(1)
 
         # Close 'All Filters' menu
         driver.find_element(By.XPATH, '//*[@id="right-container"]/div[6]/div/aside/header/button').click()
-        # driver.implicitly_wait(1)
+        time.sleep(1)
 
         # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
         # listings for every page of the search results
-        # wait_secs = 5
         old_num_files = len(os.listdir(download_dir))  # Check number of files in download path prior to download
         driver.find_element(By.ID, 'download-and-save').click()
-        # driver.implicitly_wait(wait_secs)
 
         try:
             # Wait for data file to finish downloading
