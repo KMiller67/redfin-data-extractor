@@ -31,10 +31,7 @@ def download_wait(download_path: str, files_in_path: int, timeout: int) -> bool:
         else:
             break
 
-    if seconds < timeout:   # File was downloaded prior to timeout period
-        return True
-    else:                   # File was not downloaded before timeout period
-        return False
+    return seconds < timeout
 
 
 def home_type_select(home_types: list, driver: webdriver):
@@ -64,39 +61,9 @@ def home_type_select(home_types: list, driver: webdriver):
         driver.find_element(By.XPATH, type_xpaths[type]).click()
 
 
-class RedfinDataPuller:
+class RedfinDataExtractor:
     def __init__(self):
         pass
-
-    def connect(self):
-        """
-        Sets up a Chrome webdriver and opens up the Redfin website on the home screen, as well as specifying folder to
-        download CSVs to
-        :return: Chrome webdriver used to connect to Redfin and download directory where downloaded files will be located
-        """
-        # Get the location used by the manager and initialize the driver using Chrome
-        service = Service(executable_path=ChromeDriverManager().install())
-
-        # Specify options to run in headless mode for efficiency and to allow downloading files while in headless mode
-        options = Options()
-        options.add_argument("--headless")
-
-        # Open Chrome web browser
-        driver = webdriver.Chrome(service=service, options=options)
-
-        # Define directory where data will be downloaded and file type
-        dirname = os.path.abspath(os.path.dirname(__file__))
-        download_dir = os.path.join(dirname, 'data', '')
-
-        # Enable Chromium driver to download files while in headless mode
-        params = {'behavior': 'allow', 'downloadPath': download_dir}
-        driver.execute_cdp_cmd('Page.setDownloadBehavior', params)
-
-        # Navigate to Redfin website
-        driver.get('http://www.redfin.com')
-        time.sleep(1.5)
-
-        return driver, download_dir
 
     def listing_data(self, driver: webdriver, download_dir: str, search_criteria: str, home_types: Union[str, list],
                      delete_csv: bool = False):
@@ -117,34 +84,34 @@ class RedfinDataPuller:
 
         # Click 'All Filters'; Set to show 'For Sale' listings only by default
         driver.find_element(By.XPATH, '//*[@id="sidepane-header"]/div/div[1]/form/div[5]/div').click()
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         # Select desired 'Home Type'
         home_type_header = driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[5]/div[1]/div/span')
         driver.execute_script("return arguments[0].scrollIntoView();", home_type_header)
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         if type(home_types) == str:     # If user selects single home type (string), convert it to a list
             home_types = [home_types]
         home_type_select(home_types=home_types, driver=driver)
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         # Listing status set to both 'Coming Soon' and 'Active' by default; Uncheck 'Coming Soon'
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[1]/div/div[2]/span[1]/label/span[1]').click()
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         # Set to only include listings from the last 7 days (reduces # of homes to download; need to keep < 350)
         select = Select(driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[2]/div[2]/span/span/select'))
         select.select_by_visible_text('Less than 7 days')
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         # Turn off 'Foreclosures' listing type
         listing_type_header = driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[10]/div[1]/div/span')
         driver.execute_script('return arguments[0].scrollIntoView()', listing_type_header)
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[10]/div[2]/div/div[1]/div[2]/span/label/span[1]').click()
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         # Close 'All Filters' menu
         driver.find_element(By.XPATH, '//*[@id="right-container"]/div[6]/div/aside/header/button').click()
@@ -194,35 +161,35 @@ class RedfinDataPuller:
         # Identify search bar on home page for entering a real estate search location and search for input city/state
         # Finds first search bar on the home page, which is the one we're looking for
         driver.find_element(By.CLASS_NAME, 'search-input-box').send_keys(f'{search_criteria}' + Keys.ENTER)
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         # Click 'All Filters' and select 'Sold' filter
         driver.find_element(By.XPATH, '//*[@id="sidepane-header"]/div/div[1]/form/div[5]/div').click()
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[1]/div/div/div/div/div/div/div[3]').click()
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         # Select desired 'Home Type'
         home_type_header = driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[5]/div[1]/div/span')
         driver.execute_script("return arguments[0].scrollIntoView();", home_type_header)
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         if type(home_types) == str:     # If user selects single home type (string), convert it to a list
             home_types = [home_types]
         home_type_select(home_types=home_types, driver=driver)
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         # Set to only include sales from the last week (reduces # of homes to download; need to keep < 350)
         select = Select(driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[6]/div[2]/span/span/select'))
         select.select_by_visible_text('Last 1 week')
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         # Turn off 'Foreclosures' listing type
         listing_type_header = driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[10]/div[1]/div/span')
         driver.execute_script('return arguments[0].scrollIntoView()', listing_type_header)
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         driver.find_element(By.XPATH, '//*[@id="filterContent"]/div/div[10]/div[2]/div/div[1]/div[2]/span/label/span[1]').click()
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
         # Close 'All Filters' menu
         driver.find_element(By.XPATH, '//*[@id="right-container"]/div[6]/div/aside/header/button').click()
@@ -257,6 +224,7 @@ class RedfinDataPuller:
             # Close browser
             driver.quit()
 
-re = RedfinDataPuller()
+
+re = RedfinDataExtractor()
 driver, dwnld_dir = re.connect()
 data = re.listing_data(driver, dwnld_dir, 'Rochester, MN', ['house', 'townhouse', 'condo', 'multi-family'])
