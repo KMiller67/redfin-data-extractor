@@ -6,11 +6,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 import os
 
 
-# Define directory where data will be downloaded and file type
-# dirname = os.path.abspath(os.path.dirname(__file__))
-# download_dir = os.path.join(dirname, 'src/data', '')
-
-
 class WebDriverBuilder:
     def __init__(self):
         dirname = os.path.abspath(os.path.dirname(__file__))
