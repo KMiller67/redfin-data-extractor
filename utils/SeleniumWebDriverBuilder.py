@@ -1,15 +1,16 @@
+import os
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-import os
 
-
-class WebDriverBuilder:
+class SeleniumWebDriverBuilder:
     def __init__(self):
-        dirname = os.path.abspath(os.path.dirname(__file__))
-        self.download_dir = os.path.join(dirname, 'src/data', '')
+        # Change directory to be based off of RedfinDataExtractor
+        dirname = os.path.join(os.getcwd(), './src/data', '')
+        self.download_dir = os.path.abspath(dirname)
 
     def build(self):
         """
@@ -31,3 +32,5 @@ class WebDriverBuilder:
 
         # Navigate to Redfin website
         driver.get('http://www.redfin.com')
+
+        return driver
