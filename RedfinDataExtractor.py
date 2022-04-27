@@ -5,13 +5,13 @@ import time
 import pandas as pd
 
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
-from webdriver_manager.chrome import ChromeDriverManager
 from typing import Union
+from enum import Enum
+
+from utils.SeleniumWebDriverBuilder import SeleniumWebDriverBuilder
 
 
 def download_wait(download_path: str, files_in_path: int, timeout: int) -> bool:
@@ -32,6 +32,17 @@ def download_wait(download_path: str, files_in_path: int, timeout: int) -> bool:
             break
 
     return seconds < timeout
+
+
+class HomeTypes(Enum):
+    HOUSE = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[1]/div'
+    TOWNHOUSE = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[2]/div'
+    CONDO = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[3]/div'
+    LAND = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[4]/div'
+    MULTIFAMILY = '/*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[5]/div'
+    MOBILE = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[6]/div'
+    COOP = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[7]/div'
+    OTHER = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[8]/div'
 
 
 def home_type_select(home_types: list, driver: webdriver):
@@ -63,7 +74,9 @@ def home_type_select(home_types: list, driver: webdriver):
 
 class RedfinDataExtractor:
     def __init__(self):
-        pass
+        driver_builder = SeleniumWebDriverBuilder()
+        self.download_dir = driver_builder.download_dir
+        self.driver = driver_builder.build()
 
     def listing_data(self, driver: webdriver, download_dir: str, search_criteria: str, home_types: Union[str, list],
                      delete_csv: bool = False):
@@ -223,8 +236,3 @@ class RedfinDataExtractor:
 
             # Close browser
             driver.quit()
-
-
-re = RedfinDataExtractor()
-driver, dwnld_dir = re.connect()
-data = re.listing_data(driver, dwnld_dir, 'Rochester, MN', ['house', 'townhouse', 'condo', 'multi-family'])
