@@ -58,18 +58,18 @@ def home_type_select(home_types: list, driver: webdriver):
     home_types = map(lambda x: x.lower(), home_types)
 
     # Dictionary with key being house type and value being the appropriate XPATH from Redfin site
-    type_xpaths = {'house': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[1]/div',
-                   'townhouse': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[2]/div',
-                   'condo': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[3]/div',
-                   'land': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[4]/div',
-                   'multi-family': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[5]/div',
-                   'mobile': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[6]/div',
-                   'co-op': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[7]/div',
-                   'other': '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[8]/div'}
+    type_xpaths = {'house': HomeTypes.HOUSE,
+                   'townhouse': HomeTypes.TOWNHOUSE,
+                   'condo': HomeTypes.CONDO,
+                   'land': HomeTypes.LAND,
+                   'multi-family': HomeTypes.MULTIFAMILY,
+                   'mobile': HomeTypes.MOBILE,
+                   'co-op': HomeTypes.COOP,
+                   'other': HomeTypes.OTHER}
 
     # Select desired home types within the Redfin 'All Filters' dropdown
-    for type in home_types:
-        driver.find_element(By.XPATH, type_xpaths[type]).click()
+    for home_type in home_types:
+        driver.find_element(By.XPATH, type_xpaths[home_type]).click()
 
 
 class RedfinDataExtractor:
