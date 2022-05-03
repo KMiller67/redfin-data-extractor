@@ -7,7 +7,7 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import Select, WebDriverWait
 from typing import Union
 from enum import Enum
 
@@ -39,7 +39,7 @@ class HomeTypes(Enum):
     TOWNHOUSE = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[2]/div'
     CONDO = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[3]/div'
     LAND = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[4]/div'
-    MULTIFAMILY = '/*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[5]/div'
+    MULTIFAMILY = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[5]/div'
     MOBILE = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[6]/div'
     COOP = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[7]/div'
     OTHER = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[8]/div'
@@ -54,22 +54,16 @@ def home_type_select(home_types: list, driver: webdriver):
     :param driver: Webdriver used for webscraping
     :return: N/A; used only to select desired home types on Redfin website
     """
-    # Ensure home types are lowercase
-    home_types = map(lambda x: x.lower(), home_types)
-
-    # Dictionary with key being house type and value being the appropriate XPATH from Redfin site
-    type_xpaths = {'house': HomeTypes.HOUSE,
-                   'townhouse': HomeTypes.TOWNHOUSE,
-                   'condo': HomeTypes.CONDO,
-                   'land': HomeTypes.LAND,
-                   'multi-family': HomeTypes.MULTIFAMILY,
-                   'mobile': HomeTypes.MOBILE,
-                   'co-op': HomeTypes.COOP,
-                   'other': HomeTypes.OTHER}
+    # Ensure home types are uppercase and dashes are removed
+    home_types = map(lambda x: x.upper().replace('-', ''), home_types)
 
     # Select desired home types within the Redfin 'All Filters' dropdown
     for home_type in home_types:
-        driver.find_element(By.XPATH, type_xpaths[home_type]).click()
+        try:
+            driver.find_element(By.XPATH, HomeTypes[home_type].value).click()
+        except KeyError:
+            print(f'Home type {home_type} is not an available filter option. {home_type} not selected.')
+            continue
 
 
 class RedfinDataExtractor:
@@ -236,3 +230,9 @@ class RedfinDataExtractor:
 
             # Close browser
             driver.quit()
+
+
+# re = RedfinDataExtractor()
+# search_criteria = 'Rochester, MN'
+# home_types = ['house', 'townhouse', 'dog-house', 'tree-House', 'multi-family']
+# data = re.listing_data(re.driver, re.download_dir, search_criteria, home_types)
