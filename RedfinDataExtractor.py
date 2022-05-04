@@ -9,61 +9,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from typing import Union
-from enum import Enum
 
 from utils.SeleniumWebDriverBuilder import SeleniumWebDriverBuilder
-
-
-def download_wait(download_path: str, files_in_path: int, timeout: int) -> bool:
-    """
-    Continually checks the given download path to see if a new file was added, waiting one second between checks
-    :param download_path: Path where downloaded file is expected to appear
-    :param files_in_path: Number of files in download_path prior to attempting download of real estate data
-    :param timeout: Max number of seconds to wait for downloaded file to appear
-    :return: If a new CSV was added to the directory then True, otherwise False
-    """
-    seconds = 0
-    while seconds < timeout:
-        new_num_files = len(os.listdir(download_path))  # Check number of files in download path after download start
-        if new_num_files == files_in_path:
-            time.sleep(1)
-            seconds += 1
-        else:
-            break
-
-    return seconds < timeout
-
-
-class HomeTypes(Enum):
-    HOUSE = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[1]/div'
-    TOWNHOUSE = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[2]/div'
-    CONDO = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[3]/div'
-    LAND = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[4]/div'
-    MULTIFAMILY = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[5]/div'
-    MOBILE = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[6]/div'
-    COOP = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[7]/div'
-    OTHER = '//*[@id="filterContent"]/div/div[5]/div[2]/div/div/div/div/div[8]/div'
-
-
-def home_type_select(home_types: list, driver: webdriver):
-    """
-    Helper function to select the home type(s) the user desires to pull data for; this function is intended to be used
-    AFTER the 'All Filters' dropdown has been clicked
-    :param home_types: List of all home types the user desires to pull data for; Options include: house, townhouse,
-    condo, land, multi-family, mobile, co-op, and other
-    :param driver: Webdriver used for webscraping
-    :return: N/A; used only to select desired home types on Redfin website
-    """
-    # Ensure home types are uppercase and dashes are removed
-    home_types = map(lambda x: x.upper().replace('-', ''), home_types)
-
-    # Select desired home types within the Redfin 'All Filters' dropdown
-    for home_type in home_types:
-        try:
-            driver.find_element(By.XPATH, HomeTypes[home_type].value).click()
-        except KeyError:
-            print(f'Home type {home_type} is not an available filter option. {home_type} not selected.')
-            continue
 
 
 class RedfinDataExtractor:
