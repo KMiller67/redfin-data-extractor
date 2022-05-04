@@ -21,7 +21,8 @@ class SeleniumWebDriverBuilder:
         service = Service(executable_path=ChromeDriverManager().install())
 
         # Specify options to run in headless mode for efficiency and to allow downloading files while in headless mode
-        options = Options().add_argument("--headless")
+        options = Options()
+        options.add_argument('--headless')
 
         # Open Chrome web browser
         driver = webdriver.Chrome(service=service, options=options)
