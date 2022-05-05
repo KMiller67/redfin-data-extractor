@@ -1,5 +1,5 @@
-from DataExtractor import DataExtractor
-from FilterMenu import FilterMenu
+from src.DataExtractor import DataExtractor
+from src.FilterMenu import FilterMenu
 
 
 class SalesDataExtractor(DataExtractor):

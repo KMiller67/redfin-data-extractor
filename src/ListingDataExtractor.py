@@ -1,5 +1,7 @@
-from DataExtractor import DataExtractor
-from FilterMenu import FilterMenu
+import time
+
+from src.DataExtractor import DataExtractor
+from src.FilterMenu import FilterMenu
 
 
 class ListingDataExtractor(DataExtractor):
@@ -18,6 +20,8 @@ class ListingDataExtractor(DataExtractor):
         filter_menu.closeMenu()
 
         super().downloadData()
+
+        time.sleep(3)
         super().readDownloadedData(delete_csv)
 
         self.driver.quit()
