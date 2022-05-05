@@ -7,10 +7,12 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support.ui import Select
 from typing import Union
 
-from utils.SeleniumWebDriverBuilder import SeleniumWebDriverBuilder
+from src.utils.SeleniumWebDriverBuilder import SeleniumWebDriverBuilder
+from src.ListingDataExtractor import ListingDataExtractor
+from src.SalesDataExtractor import SalesDataExtractor
 
 
 class RedfinDataExtractor:
@@ -18,6 +20,19 @@ class RedfinDataExtractor:
         driver_builder = SeleniumWebDriverBuilder()
         self.download_dir = driver_builder.download_dir
         self.driver = driver_builder.build()
+        self.listing_data_extractor = ListingDataExtractor(self.driver, self.download_dir)
+        self.sales_data_extractor = SalesDataExtractor(self.driver, self.download_dir)
+
+    def getListingData(self, search_criteria: str, home_types: list, time_on_redfin: str, delete_csv: bool):
+        return self.listing_data_extractor.getData(search_criteria, home_types, time_on_redfin, delete_csv)
+
+    def getSalesData(self, search_criteria: str, home_types: list, time_on_redfin: str, delete_csv: bool):
+        return self.sales_data_extractor.getData(search_criteria, home_types, time_on_redfin, delete_csv)
+
+
+
+
+
 
     def listing_data(self, driver: webdriver, download_dir: str, search_criteria: str, home_types: Union[str, list],
                      delete_csv: bool = False):
@@ -179,7 +194,8 @@ class RedfinDataExtractor:
             driver.quit()
 
 
-# re = RedfinDataExtractor()
-# search_criteria = 'Rochester, MN'
-# home_types = ['house', 'townhouse', 'dog-house', 'tree-House', 'multi-family']
+re = RedfinDataExtractor()
+search_criteria = 'Rochester, MN'
+home_types = ['house', 'townhouse', 'dog-house', 'tree-House', 'multi-family']
+time_on_redfin = 'Less than 3 days'
 # data = re.listing_data(re.driver, re.download_dir, search_criteria, home_types)
