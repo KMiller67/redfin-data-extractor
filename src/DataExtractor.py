@@ -30,39 +30,35 @@ def download_wait(download_path: str, files_in_path: int, timeout: int) -> bool:
 
 
 class DataExtractor:
-    def __init__(self, driver: webdriver):
+    def __init__(self, driver: webdriver, dowload_dir: str):
         self.driver = driver
+        self.download_dir = dowload_dir
 
     def searchLocation(self, search_criteria: str):
         self.driver.find_element(By.CLASS_NAME, 'search-input-box').send_keys(f'{search_criteria}' + Keys.ENTER)
         time.sleep(1.5)
 
-    def downloadData(self, download_dir: str, delete_csv: bool):
+    def downloadData(self):
         # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
         # listings for every page of the search results
-        old_num_files = len(os.listdir(download_dir))  # Check number of files in download path prior to download
-        file_type = '*.csv'
+        old_num_files = len(os.listdir(self.download_dir))  # Check number of files in download path prior to download
         self.driver.find_element(By.ID, 'download-and-save').click()
 
         try:
             # Wait for data file to finish downloading
-            download_wait(download_path=download_dir, files_in_path=old_num_files, timeout=10)
-
-            # Grab all files in downloads_dir that are CSVs and pick the last one (which was just downloaded)
-            csv_files = glob.glob(download_dir + file_type)
-            latest_file = max(csv_files, key=os.path.getctime)
-            re_data = pd.read_csv(latest_file)
-
-            if delete_csv:
-                os.remove(latest_file)
-
-            # Close browser
-            self.driver.quit()
-
-            return re_data
+            download_wait(download_path=self.download_dir, files_in_path=old_num_files, timeout=10)
 
         except Exception as e:
             print(e)
 
-            # Close browser
-            self.driver.quit()
+    def readDownloadedData(self, delete_csv: bool):
+        # Grab all files in downloads_dir that are CSVs and pick the last one (which was just downloaded)
+        file_type = '*.csv'
+        csv_files = glob.glob(self.download_dir + file_type)
+        latest_file = max(csv_files, key=os.path.getctime)
+        re_data = pd.read_csv(latest_file)
+
+        if delete_csv:
+            os.remove(latest_file)
+
+        return re_data
