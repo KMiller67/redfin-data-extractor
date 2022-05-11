@@ -46,7 +46,7 @@ class DataExtractor:
 
         try:
             # Wait for data file to finish downloading
-            download_wait(download_path=self.download_dir, files_in_path=old_num_files, timeout=10)
+            download_wait(download_path=self.download_dir, files_in_path=old_num_files, timeout=60)
 
         except Exception as e:
             print(e)
@@ -55,10 +55,15 @@ class DataExtractor:
         # Grab all files in downloads_dir that are CSVs and pick the last one (which was just downloaded)
         file_type = '*.csv'
         csv_files = glob.glob(self.download_dir + file_type)
-        latest_file = max(csv_files, key=os.path.getctime)
-        re_data = pd.read_csv(latest_file)
+        try:
+            latest_file = max(csv_files, key=os.path.getctime)
+            re_data = pd.read_csv(latest_file)
 
-        if delete_csv:
-            os.remove(latest_file)
+            if delete_csv:
+                os.remove(latest_file)
 
-        return re_data
+            return re_data
+
+        except ValueError:
+            print('No CSV in directory')
+
