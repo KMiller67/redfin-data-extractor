@@ -17,9 +17,8 @@ from src.SalesDataExtractor import SalesDataExtractor
 
 class RedfinDataExtractor:
     def __init__(self):
-        driver_builder = SeleniumWebDriverBuilder()
-        download_dir = driver_builder.download_dir
-        self.driver = driver_builder.build()
+        self.driver = SeleniumWebDriverBuilder()
+        download_dir = self.driver.download_directory
         self.listing_data_extractor = ListingDataExtractor(self.driver, download_dir)
         self.sales_data_extractor = SalesDataExtractor(self.driver, download_dir)
 
