@@ -4,7 +4,7 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.ui import Select
 
 from pages.Page import Page
-from src.HomeTypes import HomeTypes
+from data.HomeTypes import HomeTypes
 
 
 class FilterMenu(Page):

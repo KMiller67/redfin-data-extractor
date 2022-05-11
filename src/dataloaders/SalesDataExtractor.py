@@ -1,6 +1,6 @@
 from selenium.webdriver.chrome import webdriver
 
-from src.DataExtractor import DataExtractor
+from dataloaders.DataExtractor import DataExtractor
 from pages.FilterMenu import FilterMenu
 
 
