@@ -3,8 +3,8 @@ from src.FilterMenu import FilterMenu
 
 
 class SalesDataExtractor(DataExtractor):
-    # def __init__(self):
-    #     super().__init__(self.driver)
+    def __init__(self):
+        super().__init__()
 
     def getData(self, search_criteria: str, home_types: list, time_on_redfin: str, delete_csv: bool):
         super().searchLocation(search_criteria)

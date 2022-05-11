@@ -5,8 +5,8 @@ from src.FilterMenu import FilterMenu
 
 
 class ListingDataExtractor(DataExtractor):
-    # def __init__(self):
-    #     super().__init__(self.driver)
+    def __init__(self):
+        super().__init__()
 
     def getData(self, search_criteria: str, home_types: list, time_on_redfin: str, delete_csv: bool):
         super().searchLocation(search_criteria)
@@ -23,5 +23,3 @@ class ListingDataExtractor(DataExtractor):
 
         time.sleep(3)
         super().readDownloadedData(delete_csv)
-
-        self.driver.quit()
