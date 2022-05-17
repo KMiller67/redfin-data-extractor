@@ -2,7 +2,7 @@ import time
 
 from selenium import webdriver
 
-from DataExtractor import DataExtractor
+from src.datapullers.DataExtractor import DataExtractor
 from src.pages.FilterMenu import FilterMenu
 
 
