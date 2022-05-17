@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -6,32 +7,44 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 
+def get_default_download_destination():
+    # Default directory based on RedfinDataExtractor's needs
+    directory_name = os.path.join(os.getcwd(), './src/data', '')
+    return os.path.abspath(directory_name)
+
+
+def get_default_headless_driver_options():
+    # Specify options to run in headless mode for efficiency and to allow downloading files while in headless mode
+    options = Options()
+    options.add_argument('--headless')
+    return options
+
+
+def create_headless_chrome_driver(
+        options: Options = None,
+        devtools_command_to_params_dict: Dict[str, Dict] = dict) -> webdriver:
+
+    driver = webdriver.Chrome(
+        service=Service(executable_path=ChromeDriverManager().install()),
+        options=get_default_headless_driver_options() if options is None else options
+    )
+
+    for command, command_arguments in devtools_command_to_params_dict.items():
+        driver.execute_cdp_cmd(command, command_arguments)
+
+    return driver
+
+
 class SeleniumWebDriverBuilder:
-    def __init__(self):
-        # Change directory to be based off of RedfinDataExtractor
-        dirname = os.path.join(os.getcwd(), './src/data', '')
-        self.download_dir = os.path.abspath(dirname)
-
-    def build(self):
-        """
-        Sets up a Chrome webdriver and opens up the Redfin website on the home screen; downloaded CSVs are set to
-        src/data folder by default
-        """
-        # Get the location used by the manager and initialize the driver using Chrome
-        service = Service(executable_path=ChromeDriverManager().install())
-
-        # Specify options to run in headless mode for efficiency and to allow downloading files while in headless mode
-        options = Options()
-        options.add_argument('--headless')
-
-        # Open Chrome web browser
-        driver = webdriver.Chrome(service=service, options=options)
-
+    def build_default_devtool_commands(self):
         # Enable Chromium driver to download files while in headless mode
-        params = {'behavior': 'allow', 'downloadPath': self.download_dir}
-        driver.execute_cdp_cmd('Page.setDownloadBehavior', params)
+        return {'Page.setDownloadBehavior': {'behavior': 'allow', 'downloadPath': self.download_directory}}
 
-        # Navigate to Redfin website
-        driver.get('http://www.redfin.com')
-
-        return driver
+    def __init__(self):
+        """
+        Sets up a Chrome webdriver; downloaded CSVs are set to src/data folder by default
+        """
+        self.download_directory = get_default_download_destination()
+        chrome_devtool_commands = self.build_default_devtool_commands()
+        # Open Chrom web browser
+        self.driver: webdriver = create_headless_chrome_driver(devtools_command_to_params_dict=chrome_devtool_commands)
