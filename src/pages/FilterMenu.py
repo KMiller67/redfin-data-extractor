@@ -3,7 +3,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-import Page
+from src.pages.Page import Page
 from src.data.HomeTypes import HomeTypes
 
 
