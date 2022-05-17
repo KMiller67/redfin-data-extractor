@@ -30,9 +30,13 @@ def download_wait(download_path: str, files_in_path: int, timeout: int) -> bool:
 
 
 class DataExtractor:
-    def __init__(self, driver: webdriver, dowload_dir: str):
+    def __init__(self, driver: webdriver, download_dir: str, homepage_url: str = 'https://www.redfin.com'):
         self.driver = driver
-        self.download_dir = dowload_dir
+        self.download_dir = download_dir
+        self.homepage_url = homepage_url
+
+    def go_to_homepage(self):
+        self.driver.get(self.homepage_url)
 
     def searchLocation(self, search_criteria: str):
         self.driver.find_element(By.CLASS_NAME, 'search-input-box').send_keys(f'{search_criteria}' + Keys.ENTER)
