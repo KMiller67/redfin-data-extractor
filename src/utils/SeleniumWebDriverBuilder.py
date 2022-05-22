@@ -46,5 +46,11 @@ class SeleniumWebDriverBuilder:
         """
         self.download_directory = get_default_download_destination()
         chrome_devtool_commands = self.build_default_devtool_commands()
-        # Open Chrom web browser
+        # Open Chrome web browser
         self.driver: webdriver = create_headless_chrome_driver(devtools_command_to_params_dict=chrome_devtool_commands)
+
+    def open_url(self, website_url: str):
+        self.driver.get(website_url)
+
+    def close_browser(self):
+        self.driver.quit()
