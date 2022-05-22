@@ -69,3 +69,9 @@ class DataExtractor:
 
         except ValueError:
             print('No CSV in directory')
+
+    def read_data(self):
+        data_url = self.driver.find_element(By.ID, 'download-and-save').get_attribute('href')
+        storage_options = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36'}
+
+        return pd.read_csv(data_url, storage_options=storage_options)
