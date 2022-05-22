@@ -22,9 +22,5 @@ class SalesDataExtractor(DataExtractor):
         filter_menu.select_foreclosures_checkbox()
         filter_menu.close_menu()
 
-        # super().download_data()
-        #
-        # time.sleep(3)
-        # super().read_downloaded_data(delete_csv)
         data = super().read_data()
         return data
