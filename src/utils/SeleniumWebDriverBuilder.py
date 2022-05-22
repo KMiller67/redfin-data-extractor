@@ -51,6 +51,3 @@ class SeleniumWebDriverBuilder:
 
     def open_url(self, website_url: str):
         self.driver.get(website_url)
-
-    def close_browser(self):
-        self.driver.quit()
