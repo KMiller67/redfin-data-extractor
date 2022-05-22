@@ -41,35 +41,6 @@ class DataExtractor:
         self.driver.find_element(By.CLASS_NAME, 'search-input-box').send_keys(f'{search_criteria}' + Keys.ENTER)
         time.sleep(1.5)
 
-    def download_data(self):
-        # Click the (Download All) link at the bottom of results page to download a CSV with data from all real estate
-        # listings for every page of the search results
-        old_num_files = len(os.listdir(self.download_directory))  # Check number of files in download path prior to download
-        self.driver.find_element(By.ID, 'download-and-save').click()
-
-        try:
-            # Wait for data file to finish downloading
-            download_wait(download_path=self.download_directory, files_in_path=old_num_files, timeout=60)
-
-        except Exception as e:
-            print(e)
-
-    def read_downloaded_data(self, delete_csv: bool):
-        # Grab all files in downloads_dir that are CSVs and pick the last one (which was just downloaded)
-        file_type = '*.csv'
-        csv_files = glob.glob(self.download_directory + file_type)
-        try:
-            latest_file = max(csv_files, key=os.path.getctime)
-            re_data = pd.read_csv(latest_file)
-
-            if delete_csv:
-                os.remove(latest_file)
-
-            return re_data
-
-        except ValueError:
-            print('No CSV in directory')
-
     def read_data(self):
         data_url = self.driver.find_element(By.ID, 'download-and-save').get_attribute('href')
         storage_options = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36'}
