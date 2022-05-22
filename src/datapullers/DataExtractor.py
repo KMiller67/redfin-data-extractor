@@ -1,6 +1,5 @@
 import os
 import time
-import glob
 import pandas as pd
 
 from selenium import webdriver

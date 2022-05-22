@@ -1,5 +1,3 @@
-import time
-
 from selenium import webdriver
 
 from src.datapullers.DataExtractor import DataExtractor
