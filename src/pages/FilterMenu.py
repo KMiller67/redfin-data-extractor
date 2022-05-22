@@ -13,6 +13,7 @@ class FilterMenu(Page):
     home_type_header_path = '//*[@id="filterContent"]/div/div[5]/div[1]/div/span'
     coming_soon_checkbox_element_path = '//*[@id="filterContent"]/div/div[6]/div[1]/div/div[2]/span[1]/label/span[1]'
     time_on_redfin_path = '//*[@id="filterContent"]/div/div[6]/div[2]/div[2]/span/span/select'
+    sold_within_path = '//*[@id="filterContent"]/div/div[6]/div[2]/span/span/select'
     listing_type_header_path = '//*[@id="filterContent"]/div/div[10]/div[1]/div/span'
     foreclosures_checkbox_path = '//*[@id="filterContent"]/div/div[10]/div[2]/div/div[1]/div[2]/span/label/span[1]'
     close_menu_button_path = '//*[@id="right-container"]/div[6]/div/aside/header/button'
@@ -67,8 +68,12 @@ class FilterMenu(Page):
     def select_time_on_redfin(self, time_on_redfin_dropdown_option: str):
         # Set to only include listings from the last 7 days (reduces # of homes to download; need to keep < 350)
         select = Select(super().find_element(self.time_on_redfin_path))
-        select.select_by_visible_text(time_on_redfin_dropdown_option)   # Enter time_on_redfin as in dropdown; ex. 'Less than 7 days'
+        select.select_by_visible_text(time_on_redfin_dropdown_option)   # Enter as in dropdown; ex. 'Less than 7 days'
         # time.sleep(1.5)
+
+    def select_sold_within(self, sold_within_dropdown_option: str):
+        select = Select(super().find_element(self.sold_within_path))
+        select.select_by_visible_text(sold_within_dropdown_option)  # Enter as in dropdown; ex. 'Last 1 month'
 
     def select_foreclosures_checkbox(self):
         # Turn off 'Foreclosures' listing type; checked by default
