@@ -1,4 +1,4 @@
-# RedfinDataPull
+# Redfin Data Extractor
 I've been wanting to do a project using real estate data for a while now, but I've always had a difficult time finding
 where I could source my own reliable data over time without having to pay for it. I looked into Zillow's API but
 found that even if I wanted to use it, I'd be unable to store the data I'd pulled. Though this could still provide a
