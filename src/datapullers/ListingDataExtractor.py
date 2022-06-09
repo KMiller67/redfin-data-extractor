@@ -8,7 +8,7 @@ class ListingDataExtractor(DataExtractor):
     def __init__(self, driver: webdriver, download_directory: str):
         super().__init__(driver, download_directory)
 
-    def get_data(self, search_criteria: str, home_types: list, time_on_redfin: str, delete_csv: bool):
+    def get_data(self, search_criteria: str, home_types: list, time_on_redfin: str):
         super().go_to_homepage()
         super().search_location(search_criteria)
 
