@@ -2,6 +2,7 @@ import time
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import NoSuchElementException
 
 from src.pages.Page import Page
 from src.data.HomeTypes import HomeTypes
@@ -48,6 +49,10 @@ class FilterMenu(Page):
 
             except KeyError:
                 print(f'Home type {home_type} is not an available filter option. {home_type} not selected.')
+                continue
+
+            except NoSuchElementException:
+                print(f'Home type {home_type} could not be found. May not be an available home type filter option.')
                 continue
 
     def select_home_types(self, home_types: list):
